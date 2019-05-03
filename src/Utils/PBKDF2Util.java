@@ -7,6 +7,7 @@ import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 public class PBKDF2Util {
 
@@ -18,7 +19,9 @@ public class PBKDF2Util {
 
         try {
             SecretKeyFactory pbkdf2 = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-            return pbkdf2.generateSecret(spec);
+            SecretKey tmpSecretKey = pbkdf2.generateSecret(spec);
+
+            return new SecretKeySpec(tmpSecretKey.getEncoded(), "AES");
         } catch (Exception e) {
             System.err.println(e);
             e.printStackTrace();
