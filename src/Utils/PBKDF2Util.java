@@ -7,6 +7,7 @@ import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class PBKDF2Util {
@@ -38,5 +39,14 @@ public class PBKDF2Util {
         sr.nextBytes(salt);
 
         return Hex.encodeHexString(salt);
+    }
+    
+    public IvParameterSpec getIv() throws NoSuchAlgorithmException {
+        SecureRandom sr = new SecureRandom();
+
+        byte[] ivBytes = new byte[16];
+        sr.nextBytes(ivBytes);
+
+        return new IvParameterSpec(ivBytes);
     }
 }

@@ -3,43 +3,27 @@ package trabsymmetriccripto;
 import Utils.PBKDF2Util;
 import Utils.StringUtils;
 import java.security.NoSuchAlgorithmException;
-import java.util.Scanner;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class Main {
 
-    private static void saveKey() {
-
-    }
-
-    private static void cifrarMsg() {
-
-    }
-
-    private static String decifrarMsg() {
-        return "";
-    }
-
-    private static String getPasswordFromInput(String msg) {
-        Scanner input = new Scanner(System.in);
-        System.out.println(msg);
-        return input.nextLine();
-    }
-
     public static void main(String[] args) throws NoSuchAlgorithmException, Exception {
         PBKDF2Util pbdk2Util = new PBKDF2Util();
+        Encryptor cripto = new Encryptor();
 
         // Key Store
         String fileName = "keystore.bcfks";
-        String masterPassword = getPasswordFromInput("Digite a senha mestre: ");
+        String masterPassword = StringUtils.getPasswordFromInput("Digite a senha mestre: ");
         KeyStoreAdapter keyStore = new KeyStoreAdapter(masterPassword, fileName);
 
         // gerando salt
         String salt = pbdk2Util.getSalt();
         System.err.println("Salt: " + salt);
 
-        String password = getPasswordFromInput("Digite a senha: ");
-        String aliasKey = getPasswordFromInput("Digite um alias para guardar sua chave (ex: senha1): ");
+        String password = StringUtils.getPasswordFromInput("Digite a senha: ");
+        String aliasKey = StringUtils.getPasswordFromInput("Digite um alias para guardar sua chave (ex: senha1): ");
 
         SecretKey generateDerivedKey = PBKDF2Util.generateDerivedKey(password, salt, 10000);
         System.err.println("Key: " + StringUtils.keyToString(generateDerivedKey));
@@ -48,6 +32,14 @@ public class Main {
         keyStore.printKeyStore();
 
         SecretKey key2 = keyStore.getSecretKey(aliasKey, password);
-        System.err.println("Get key: " + StringUtils.keyToString(key2));
+
+        String message = "Mensagem teste";
+        IvParameterSpec iv = pbdk2Util.getIv();
+        String cifrarMsg = cripto.cifrarMsg((SecretKeySpec) generateDerivedKey, iv, message);
+        System.out.println("encrypted message: " + cifrarMsg);
+
+        
+        String decifrada = cripto.decifrarMsg((SecretKeySpec) generateDerivedKey, iv, cifrarMsg);
+        System.err.println("Decifrada: " + decifrada);
     }
 }

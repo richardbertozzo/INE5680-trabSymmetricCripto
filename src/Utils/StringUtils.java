@@ -1,5 +1,6 @@
 package Utils;
 
+import java.util.Scanner;
 import javax.crypto.SecretKey;
 import org.apache.commons.codec.binary.Hex;
 
@@ -29,8 +30,14 @@ public class StringUtils {
     public static String toString(byte[] bytes) {
         return toString(bytes, bytes.length);
     }
-    
+
     public static String keyToString(SecretKey sk) {
         return Hex.encodeHexString(sk.getEncoded());
+    }
+
+    public static String getPasswordFromInput(String msg) {
+        Scanner input = new Scanner(System.in);
+        System.out.println(msg);
+        return input.nextLine();
     }
 }
