@@ -4,10 +4,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.KeyStore.SecretKeyEntry;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import javax.crypto.SecretKey;
 import java.security.Security;
+import java.security.UnrecoverableEntryException;
 import java.util.Enumeration;
+import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.bouncycastle.crypto.CryptoServicesRegistrar;
 import org.bouncycastle.crypto.fips.FipsDRBG;
@@ -31,7 +36,7 @@ public class KeyStoreAdapter {
 
         this.fileName = fileName;
         // Criar o keystore no diretorio atual
-        this.keyStore = KeyStore.getInstance("PKCS12");
+        this.keyStore = KeyStore.getInstance("BCFKS", "BCFIPS");
         // Cria do zero o keystore
         this.keyStore.load(null, null);
 
@@ -45,6 +50,16 @@ public class KeyStoreAdapter {
 
         keyStore.setKeyEntry(alias, secretKey, passwordChar, null);
         keyStore.store(new FileOutputStream(this.fileName), passwordChar);
+    }
+
+    public SecretKey getSecretKey(String keyAlias, String password) throws Exception {
+        char[] keyPassword = password.toCharArray();
+        KeyStore.ProtectionParameter entryPassword
+                = new KeyStore.PasswordProtection(keyPassword);
+
+        KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) this.keyStore.getEntry(keyAlias, entryPassword);
+
+        return secretKeyEntry.getSecretKey();
     }
 
     public void printKeyStore() throws Exception {
