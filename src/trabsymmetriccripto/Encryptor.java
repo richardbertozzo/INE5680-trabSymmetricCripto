@@ -1,6 +1,5 @@
 package trabsymmetriccripto;
 
-import Utils.StringUtils;
 import java.security.Security;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -11,7 +10,6 @@ import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
 
 public class Encryptor {
 
@@ -39,11 +37,11 @@ public class Encryptor {
 
     public String decifrarMsg(SecretKey key, IvParameterSpec ivSpec, String message) throws Exception {
         try {
-            cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key.getEncoded(), "AES"), ivSpec);
+            cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
 
             byte[] original = cipher.doFinal(message.getBytes());
-            
-            return Hex.encodeHexString(original);
+
+            return Base64.encodeBase64String(original);
         } catch (IllegalBlockSizeException | BadPaddingException e) {
             System.out.println(e);
         }

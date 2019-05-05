@@ -36,11 +36,15 @@ public class Main {
 
         // decifragem
         SecretKey secretKey = keyStore.getSecretKey(aliasKey, password);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getEncoded(), "AES");
+        System.err.println("Key decifragem: " + StringUtils.keyToString(secretKeySpec));
         
+        System.err.println("Iv dec: " + encryptedMessage.substring(0, 32));
         byte[] ivBytes = Hex.decodeHex(encryptedMessage.substring(0, 32).toCharArray());
         IvParameterSpec iv = new IvParameterSpec(ivBytes);
         String message = encryptedMessage.substring(32, encryptedMessage.length());
-        String decryptedMessage = encryptor.decifrarMsg(secretKey, iv, message);
+        System.err.println("msg dec: " + message);
+        String decryptedMessage = encryptor.decifrarMsg(secretKeySpec, iv, message);
         System.err.println("Mensagem decifrada: " + decryptedMessage);
         
         return decryptedMessage;
