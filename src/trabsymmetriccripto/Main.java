@@ -9,10 +9,13 @@ import org.apache.commons.codec.binary.Hex;
 
 public class Main {
     
+    private static int countAlias = 0;
+    
     private static String sendMessage(KeyStoreAdapter keyStore, Encryptor encryptor) throws Exception {
         String message = StringUtils.getStringFromInput("Digite a mensagem que deseja enviar: ");
         String password = StringUtils.getStringFromInput("Digite uma senha para criptografar a sua mensagem: ");
-        String aliasKey = StringUtils.getStringFromInput("Digite um alias para guardar sua chave (ex: senha1): ");
+        countAlias += 1;
+        String aliasKey = "password" + countAlias;
         
         String salt = PBKDF2Util.getSalt();
         SecretKey generateDerivedKey = PBKDF2Util.generateDerivedKey(password, salt, 10000);
@@ -32,18 +35,17 @@ public class Main {
     
     private static String receiveMessage(KeyStoreAdapter keyStore, String encryptedMessage, Encryptor encryptor) throws Exception {
         String password = StringUtils.getStringFromInput("Digite uma senha para descriptografar a mensagem: ");
-        String aliasKey = StringUtils.getStringFromInput("Digite um alias da chave (ex: senha1): ");
+        String aliasKey = "password" + countAlias;
 
         // decifragem
         SecretKey secretKey = keyStore.getSecretKey(aliasKey, password);
         SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getEncoded(), "AES");
-        System.err.println("Key decifragem: " + StringUtils.keyToString(secretKeySpec));
         
-        System.err.println("Iv dec: " + encryptedMessage.substring(0, 32));
         byte[] ivBytes = Hex.decodeHex(encryptedMessage.substring(0, 32).toCharArray());
         IvParameterSpec iv = new IvParameterSpec(ivBytes);
         String message = encryptedMessage.substring(32, encryptedMessage.length());
         
+        System.err.println("Messagem cifrada recebida: " + message);
         String decryptedMessage = encryptor.decifrarMsg(secretKeySpec, iv, message);
         
         return decryptedMessage;
@@ -72,8 +74,6 @@ public class Main {
         
         String ivMoreEncryptedMessage = sendMessage(keyStore, encryptor);
         System.err.println("Iv and message: " + ivMoreEncryptedMessage);
-        
-        keyStore.printKeyStore();
 
         // decifragem
         String decryptedMessage = receiveMessage(keyStore, ivMoreEncryptedMessage, encryptor);

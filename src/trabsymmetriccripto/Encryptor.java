@@ -22,10 +22,12 @@ public class Encryptor {
             cipher.init(Cipher.ENCRYPT_MODE, key, iv);
 
             byte[] decodeHex = Base64.decodeBase64(message);
-            
-            byte[] encrypted = cipher.doFinal(decodeHex);
 
-            return Base64.encodeBase64String(encrypted);
+            String charSet = "UTF-8";
+            byte[] in = message.getBytes(charSet);
+            byte[] out = cipher.doFinal(in);
+            String encStr = new String(Base64.encodeBase64(out));
+            return encStr;
         } catch (Exception e) {
             System.err.println(e);
         }
@@ -36,12 +38,13 @@ public class Encryptor {
     public String decifrarMsg(SecretKey key, IvParameterSpec ivSpec, String message) throws Exception {
         try {
             cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
-            
-            byte[] decodeHex = Base64.decodeBase64(message);
 
-            byte[] original = cipher.doFinal(decodeHex);
+            byte[] enc = Base64.decodeBase64(message);
+            byte[] utf8 = cipher.doFinal(enc);
+            String charSet = "UTF-8";
+            String plainStr = new String(utf8, charSet);
 
-            return Base64.encodeBase64String(original);
+            return plainStr;
         } catch (IllegalBlockSizeException | BadPaddingException e) {
             System.out.println(e);
         }
