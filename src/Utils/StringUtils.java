@@ -35,9 +35,44 @@ public class StringUtils {
         return Hex.encodeHexString(sk.getEncoded());
     }
 
-    public static String getPasswordFromInput(String msg) {
+    public static String getStringFromInput(String msg) {
+        if (msg != null) {
+            System.out.println(msg);
+        }
+
         Scanner input = new Scanner(System.in);
-        System.out.println(msg);
         return input.nextLine();
+    }
+
+    /**
+     * Return length many bytes of the passed in byte array as a hex string.
+     *
+     * @param data the bytes to be converted.
+     * @param length the number of bytes in the data block to be converted.
+     * @return a hex representation of length bytes of data.
+     */
+    private static String toHex(byte[] data, int length) {
+        String digits = "0123456789abcdef";
+
+        StringBuffer buf = new StringBuffer();
+
+        for (int i = 0; i != length; i++) {
+            int v = data[i] & 0xff;
+
+            buf.append(digits.charAt(v >> 4));
+            buf.append(digits.charAt(v & 0xf));
+        }
+
+        return buf.toString();
+    }
+
+    /**
+     * Return the passed in byte array as a hex string.
+     *
+     * @param data the bytes to be converted.
+     * @return a hex representation of data.
+     */
+    public static String toHex(byte[] data) {
+        return toHex(data, data.length);
     }
 }

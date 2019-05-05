@@ -5,16 +5,13 @@ import org.apache.commons.codec.binary.Hex;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class PBKDF2Util {
 
-    /**
-     * Gerar chave derivada da senha
-     */
     public static SecretKey generateDerivedKey(String password, String salt, Integer iterations) {
         PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), iterations, 128);
 
@@ -32,7 +29,7 @@ public class PBKDF2Util {
     }
 
     /*Usado para gerar o salt  */
-    public String getSalt() throws NoSuchAlgorithmException {
+    public static String getSalt() throws NoSuchAlgorithmException {
         SecureRandom sr = new SecureRandom();
 
         byte[] salt = new byte[16];
@@ -41,12 +38,20 @@ public class PBKDF2Util {
         return Hex.encodeHexString(salt);
     }
     
-    public IvParameterSpec getIv() throws NoSuchAlgorithmException {
-        SecureRandom sr = new SecureRandom();
+    public static byte[] getIv() throws NoSuchAlgorithmException, NoSuchProviderException {
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
 
         byte[] ivBytes = new byte[16];
-        sr.nextBytes(ivBytes);
+        random.nextBytes(ivBytes);
 
-        return new IvParameterSpec(ivBytes);
+        return ivBytes;
+    }
+    
+    public static byte[] getIvByBytes(byte[] iv) throws NoSuchAlgorithmException, NoSuchProviderException {
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+        
+        random.setSeed(iv);
+
+        return iv;
     }
 }

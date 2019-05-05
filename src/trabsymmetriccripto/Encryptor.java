@@ -1,12 +1,9 @@
 package trabsymmetriccripto;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.Security;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
@@ -17,8 +14,7 @@ public class Encryptor {
 
     private final Cipher cipher;
 
-    public Encryptor() throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException {
-        // Install Provider FIPS
+    public Encryptor() throws Exception {
         Security.addProvider(new BouncyCastleFipsProvider());
 
         this.cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BCFIPS");
@@ -26,7 +22,7 @@ public class Encryptor {
 
     public String cifrarMsg(SecretKeySpec key, IvParameterSpec iv, String message) {
         try {
-            this.cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+            cipher.init(Cipher.ENCRYPT_MODE, key, iv);
 
             byte[] encrypted = cipher.doFinal(message.getBytes());
 
@@ -40,9 +36,9 @@ public class Encryptor {
 
     public String decifrarMsg(SecretKeySpec key, IvParameterSpec ivSpec, String message) throws Exception {
         try {
-            this.cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
+            cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
 
-            byte[] original = cipher.doFinal(Base64.decodeBase64(message));
+            byte[] original = cipher.doFinal(message.getBytes());
 
             return new String(original);
         } catch (IllegalBlockSizeException | BadPaddingException e) {

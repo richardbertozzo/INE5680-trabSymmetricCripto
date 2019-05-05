@@ -2,44 +2,81 @@ package trabsymmetriccripto;
 
 import Utils.PBKDF2Util;
 import Utils.StringUtils;
-import java.security.NoSuchAlgorithmException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import org.apache.commons.codec.binary.Hex;
 
 public class Main {
+    
+    private static String sendMessage(KeyStoreAdapter keyStore, Encryptor encryptor) throws Exception {
+        String message = StringUtils.getStringFromInput("Digite a mensagem que deseja enviar: ");
+        String password = StringUtils.getStringFromInput("Digite uma senha para criptografar a sua mensagem: ");
+        String aliasKey = StringUtils.getStringFromInput("Digite um alias para guardar sua chave (ex: senha1): ");
+        
+        String salt = PBKDF2Util.getSalt();
+        SecretKey generateDerivedKey = PBKDF2Util.generateDerivedKey(password, salt, 10000);
+        System.err.println("");
+        System.err.println("Chave gerada: " + StringUtils.keyToString(generateDerivedKey));
+        
+        keyStore.storeSecretKey(password, generateDerivedKey, aliasKey);
+        
+        byte[] ivBytes = PBKDF2Util.getIv();
+        System.out.println("IV gerado: " + StringUtils.toHex(ivBytes));
+        IvParameterSpec iv = new IvParameterSpec(ivBytes);
+        String encryptedMessage = encryptor.cifrarMsg((SecretKeySpec) generateDerivedKey, iv, message);
+        System.out.println("encrypted message: " + encryptedMessage);
+        
+        return StringUtils.toHex(ivBytes) + encryptedMessage;
+    }
+    
+    private static String receiveMessage(KeyStoreAdapter keyStore, String encryptedMessage, Encryptor encryptor) throws Exception {
+        String password = StringUtils.getStringFromInput("Digite uma senha para descriptografar a mensagem: ");
+        String aliasKey = StringUtils.getStringFromInput("Digite um alias da chave (ex: senha1): ");
 
-    public static void main(String[] args) throws NoSuchAlgorithmException, Exception {
-        PBKDF2Util pbdk2Util = new PBKDF2Util();
-        Encryptor cripto = new Encryptor();
+        // decifragem
+        SecretKey secretKey = keyStore.getSecretKey(aliasKey, password);
+        
+        byte[] ivBytes = Hex.decodeHex(encryptedMessage.substring(0, 32).toCharArray());
+        IvParameterSpec iv = new IvParameterSpec(ivBytes);
+        String message = encryptedMessage.substring(32, encryptedMessage.length());
+        String decryptedMessage = encryptor.decifrarMsg((SecretKeySpec) secretKey, iv, message);
+        System.err.println("Mensagem decifrada: " + decryptedMessage);
+        
+        return decryptedMessage;
+    }
+    
+    private static void executeConversation() throws Exception {
+        Encryptor encryptor = new Encryptor();
+        
+        System.err.println("----------------------");
+        System.err.println("Criptografia simetrica");
+        System.err.println("----------------------");
 
         // Key Store
         String fileName = "keystore.bcfks";
-        String masterPassword = StringUtils.getPasswordFromInput("Digite a senha mestre: ");
+        String masterPassword = StringUtils.getStringFromInput("Digite a senha mestre do Key Store: ");
         KeyStoreAdapter keyStore = new KeyStoreAdapter(masterPassword, fileName);
-
-        // gerando salt
-        String salt = pbdk2Util.getSalt();
-        System.err.println("Salt: " + salt);
-
-        String password = StringUtils.getPasswordFromInput("Digite a senha: ");
-        String aliasKey = StringUtils.getPasswordFromInput("Digite um alias para guardar sua chave (ex: senha1): ");
-
-        SecretKey generateDerivedKey = PBKDF2Util.generateDerivedKey(password, salt, 10000);
-        System.err.println("Key: " + StringUtils.keyToString(generateDerivedKey));
-
-        keyStore.storeSecretKey(password, generateDerivedKey, aliasKey);
+        
+        System.err.println("Você é quem?");
+        System.err.println("Digite a opção: ");
+        System.err.println("1 - Alice");
+        System.err.println("2 - Bob");
+        System.err.println("3 - Ana");
+        System.err.println("4 - Pedro");
+        String option = StringUtils.getStringFromInput(null);
+        System.err.println("Opção: " + option);
+        
+        String ivMoreEncryptedMessage = sendMessage(keyStore, encryptor);
+        System.err.println("Iv and message: " + ivMoreEncryptedMessage);
+        
         keyStore.printKeyStore();
 
-        SecretKey key2 = keyStore.getSecretKey(aliasKey, password);
-
-        String message = "Mensagem teste";
-        IvParameterSpec iv = pbdk2Util.getIv();
-        String cifrarMsg = cripto.cifrarMsg((SecretKeySpec) generateDerivedKey, iv, message);
-        System.out.println("encrypted message: " + cifrarMsg);
-
-        
-        String decifrada = cripto.decifrarMsg((SecretKeySpec) generateDerivedKey, iv, cifrarMsg);
-        System.err.println("Decifrada: " + decifrada);
+        // decifragem
+        receiveMessage(keyStore, ivMoreEncryptedMessage, encryptor);
+    }
+    
+    public static void main(String[] args) throws Exception {
+        executeConversation();
     }
 }
