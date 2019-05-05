@@ -40,7 +40,7 @@ public class Main {
         byte[] ivBytes = Hex.decodeHex(encryptedMessage.substring(0, 32).toCharArray());
         IvParameterSpec iv = new IvParameterSpec(ivBytes);
         String message = encryptedMessage.substring(32, encryptedMessage.length());
-        String decryptedMessage = encryptor.decifrarMsg((SecretKeySpec) secretKey, iv, message);
+        String decryptedMessage = encryptor.decifrarMsg(secretKey, iv, message);
         System.err.println("Mensagem decifrada: " + decryptedMessage);
         
         return decryptedMessage;

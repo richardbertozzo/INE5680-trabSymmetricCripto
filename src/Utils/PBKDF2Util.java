@@ -46,12 +46,4 @@ public class PBKDF2Util {
 
         return ivBytes;
     }
-    
-    public static byte[] getIvByBytes(byte[] iv) throws NoSuchAlgorithmException, NoSuchProviderException {
-        SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-        
-        random.setSeed(iv);
-
-        return iv;
-    }
 }
