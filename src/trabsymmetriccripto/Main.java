@@ -43,9 +43,8 @@ public class Main {
         byte[] ivBytes = Hex.decodeHex(encryptedMessage.substring(0, 32).toCharArray());
         IvParameterSpec iv = new IvParameterSpec(ivBytes);
         String message = encryptedMessage.substring(32, encryptedMessage.length());
-        System.err.println("msg dec: " + message);
+        
         String decryptedMessage = encryptor.decifrarMsg(secretKeySpec, iv, message);
-        System.err.println("Mensagem decifrada: " + decryptedMessage);
         
         return decryptedMessage;
     }
@@ -77,7 +76,8 @@ public class Main {
         keyStore.printKeyStore();
 
         // decifragem
-        receiveMessage(keyStore, ivMoreEncryptedMessage, encryptor);
+        String decryptedMessage = receiveMessage(keyStore, ivMoreEncryptedMessage, encryptor);
+        System.err.println("Mensagem decifrada: " + decryptedMessage);
     }
     
     public static void main(String[] args) throws Exception {

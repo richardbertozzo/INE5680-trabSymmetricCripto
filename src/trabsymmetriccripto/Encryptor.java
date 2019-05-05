@@ -1,13 +1,11 @@
 package trabsymmetriccripto;
 
-import java.security.Security;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -16,16 +14,16 @@ public class Encryptor {
     private final Cipher cipher;
 
     public Encryptor() throws Exception {
-        Security.addProvider(new BouncyCastleFipsProvider());
-
-        this.cipher = Cipher.getInstance("AES/CTR/NoPadding", "BCFIPS");
+        cipher = Cipher.getInstance("AES/CTR/NoPadding");
     }
 
     public String cifrarMsg(SecretKeySpec key, IvParameterSpec iv, String message) {
         try {
             cipher.init(Cipher.ENCRYPT_MODE, key, iv);
 
-            byte[] encrypted = cipher.doFinal(message.getBytes());
+            byte[] decodeHex = Base64.decodeBase64(message);
+            
+            byte[] encrypted = cipher.doFinal(decodeHex);
 
             return Base64.encodeBase64String(encrypted);
         } catch (Exception e) {
@@ -38,8 +36,10 @@ public class Encryptor {
     public String decifrarMsg(SecretKey key, IvParameterSpec ivSpec, String message) throws Exception {
         try {
             cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
+            
+            byte[] decodeHex = Base64.decodeBase64(message);
 
-            byte[] original = cipher.doFinal(message.getBytes());
+            byte[] original = cipher.doFinal(decodeHex);
 
             return Base64.encodeBase64String(original);
         } catch (IllegalBlockSizeException | BadPaddingException e) {
